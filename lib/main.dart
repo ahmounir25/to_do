@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:to_do/layout/home_layout.dart';
+import 'package:to_do/shared/styles/myThemeData.dart';
 
 void main() {
   runApp(MyApp());
@@ -14,6 +15,7 @@ class MyApp extends StatelessWidget {
       },
       initialRoute:homeScreen.routeName,
       debugShowCheckedModeBanner: false,
+      theme: myThemeData.lightTheme,
     );
   }
 }
