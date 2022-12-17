@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:to_do/models/task.dart';
+import 'package:to_do/shared/network/local/fireBase_Utilities.dart';
 import 'package:to_do/shared/styles/colors.dart';
 import 'package:to_do/shared/styles/myThemeData.dart';
 
@@ -9,10 +11,9 @@ class addTaskSheet extends StatefulWidget {
 
 class _addTaskSheetState extends State<addTaskSheet> {
   var titleController = TextEditingController();
-
   var descriptionController = TextEditingController();
-
-  GlobalKey<FormState> formKey=GlobalKey<FormState>();
+  DateTime selectedDate = DateTime.now();
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +27,7 @@ class _addTaskSheetState extends State<addTaskSheet> {
               style: myThemeData.lightTheme.textTheme.headline2,
             ),
             Form(
-              key:formKey ,
+              key: formKey,
               child: Container(
                 margin: EdgeInsets.all(15),
                 child: Column(
@@ -38,12 +39,12 @@ class _addTaskSheetState extends State<addTaskSheet> {
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20))),
                       controller: titleController,
-                      validator:(txt){
-                        if(txt!=null && txt.isEmpty){
+                      validator: (txt) {
+                        if (txt != null && txt.isEmpty) {
                           return "Please Enter Title ";
                         }
                         return null;
-                      } ,
+                      },
                     ),
                     SizedBox(
                       height: 15,
@@ -55,8 +56,8 @@ class _addTaskSheetState extends State<addTaskSheet> {
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20))),
                       controller: descriptionController,
-                      validator: (txt){
-                        if(txt!=null&&txt.isEmpty){
+                      validator: (txt) {
+                        if (txt != null && txt.isEmpty) {
                           return "Please Enter Description";
                         }
                         return null;
@@ -74,27 +75,51 @@ class _addTaskSheetState extends State<addTaskSheet> {
             SizedBox(
               height: 5,
             ),
-            Text(
-              "25/5/2022",
-              style: myThemeData.lightTheme.textTheme.headline2,
+            InkWell(
+              onTap: () {
+                selectDate();
+              },
+              child: Text(
+                "${selectedDate.day} / ${selectedDate.month} / ${selectedDate
+                    .year}",
+                style: myThemeData.lightTheme.textTheme.headline2,
+              ),
             ),
             SizedBox(
               height: 20,
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                primary: blueColor,
-                fixedSize:Size(150, 50)
-              ),
+                style: ElevatedButton.styleFrom(
+                    primary: blueColor, fixedSize: Size(150, 50)),
                 onPressed: () {
-                  if(formKey.currentState!.validate()){
-                    Navigator.pop(context);
+                  if (formKey.currentState!.validate()) {
+                    Task task = Task(title: titleController.text,
+                        description: descriptionController.text,
+                        date
+                        :selectedDate.microsecondsSinceEpoch);
+                    addTaskToFireStore(task);
+                   // Navigator.pop(context);
                     // print("Done Successfully");
                   }
-                }, child: Text("Add Task"))
+                },
+                child: Text("Add Task"))
           ],
         ),
       ),
     );
+  }
+
+  void selectDate() async {
+    DateTime? Date = await showDatePicker(
+        context: context,
+        initialDate: selectedDate,
+        firstDate: DateTime.now(),
+        lastDate: DateTime.now().add(Duration(days: 365)));
+    if (Date!=null) {
+      selectedDate = Date;
+      setState(() {
+
+      });
+    }
   }
 }
