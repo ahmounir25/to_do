@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:to_do/models/task.dart';
+import 'package:to_do/shared/components/UI_Utilies.dart';
 import 'package:to_do/shared/network/local/fireBase_Utilities.dart';
 import 'package:to_do/shared/styles/colors.dart';
 import 'package:to_do/shared/styles/myThemeData.dart';
@@ -80,8 +81,7 @@ class _addTaskSheetState extends State<addTaskSheet> {
                 selectDate();
               },
               child: Text(
-                "${selectedDate.day} / ${selectedDate.month} / ${selectedDate
-                    .year}",
+                "${selectedDate.day} / ${selectedDate.month} / ${selectedDate.year}",
                 style: myThemeData.lightTheme.textTheme.headline2,
               ),
             ),
@@ -93,12 +93,24 @@ class _addTaskSheetState extends State<addTaskSheet> {
                     primary: blueColor, fixedSize: Size(150, 50)),
                 onPressed: () {
                   if (formKey.currentState!.validate()) {
-                    Task task = Task(title: titleController.text,
+                    Task task = Task(
+                        title: titleController.text,
                         description: descriptionController.text,
-                        date
-                        :selectedDate.microsecondsSinceEpoch);
-                    addTaskToFireStore(task);
-                   // Navigator.pop(context);
+                        date: DateUtils.dateOnly(selectedDate)
+                            .microsecondsSinceEpoch);
+                    showLoading("Loading..", context);
+                    addTaskToFireStore(task).then((value) {
+                      hideLoading(context);
+                      showMessage('Task Aded Successfully', context, 'Ok', () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      });
+                    }).catchError((error) {
+                      print(error);
+                    });
+                    // hideLoading(context);
+                    setState(() {});
+                    // Navigator.pop(context);
                     // print("Done Successfully");
                   }
                 },
@@ -115,11 +127,9 @@ class _addTaskSheetState extends State<addTaskSheet> {
         initialDate: selectedDate,
         firstDate: DateTime.now(),
         lastDate: DateTime.now().add(Duration(days: 365)));
-    if (Date!=null) {
-      selectedDate = Date;
-      setState(() {
-
-      });
+    if (Date != null) {
+      selectedDate = DateUtils.dateOnly(Date);
+      setState(() {});
     }
   }
 }

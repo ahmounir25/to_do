@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:to_do/models/task.dart';
 import 'package:to_do/shared/styles/colors.dart';
 import 'package:to_do/shared/styles/myThemeData.dart';
 
 class taskItem extends StatelessWidget {
+  Task? task;
+  taskItem(this.task);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -26,7 +29,7 @@ class taskItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "data",
+                  "${task?.title}",
                   style: Theme.of(context).textTheme.headline1?.copyWith(
                         color: Colors.black,
                         fontWeight: FontWeight.normal,
@@ -36,7 +39,7 @@ class taskItem extends StatelessWidget {
                 SizedBox(
                   height: 5,
                 ),
-                Text("15:00")
+                Text("${task?.description}")
               ],
             ),
           ),

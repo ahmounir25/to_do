@@ -1,18 +1,31 @@
 import 'package:calendar_timeline/calendar_timeline.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:to_do/models/task.dart';
+import 'package:to_do/shared/network/local/fireBase_Utilities.dart';
 import 'package:to_do/shared/styles/colors.dart';
 import 'taskItem.dart';
-class taskScreen extends StatelessWidget {
+
+class taskScreen extends StatefulWidget {
+  @override
+  State<taskScreen> createState() => _taskScreenState();
+}
+
+class _taskScreenState extends State<taskScreen> {
+  DateTime selectedDate = DateTime.now();
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         CalendarTimeline(
-          // shrink: true,
-          initialDate: DateTime.now(),
+          initialDate: selectedDate,
           firstDate: DateTime.now().subtract(Duration(days: 365)),
           lastDate: DateTime.now().add(Duration(days: 365)),
-          onDateSelected: (date) => print(date),
+          onDateSelected: (date) {
+            selectedDate = date;
+            setState(() {});
+          },
           leftMargin: 20,
           monthColor: Colors.black,
           dayColor: Colors.black,
@@ -23,12 +36,24 @@ class taskScreen extends StatelessWidget {
           locale: 'en_ISO',
         ),
         Expanded(
-          child: ListView.builder(
-            itemBuilder: (context, index) {
-              return taskItem();
-            },itemCount: 15,
-          ),
-        )
+            child: FutureBuilder<QuerySnapshot<Task?>>(
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Center(
+                child: Text("Some Thing Went Wrong .."),
+              );
+            }
+            var tasks = snapshot.data?.docs.map((e) => e.data()).toList();
+            return ListView.builder(
+              itemBuilder: (context, index) => taskItem(tasks?[index]),
+              itemCount: tasks?.length ?? 0,
+            );
+          },
+          future: getTaskFromFireStore(selectedDate),
+        ))
       ],
     );
   }
